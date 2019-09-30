@@ -204,6 +204,10 @@ int main()
 {
     Db db;
 
+    if (2 > 3U) {
+        cout << "work" << endl;
+    }
+
     while(true) {
         string command;
         getline(cin, command);
