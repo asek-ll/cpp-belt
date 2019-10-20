@@ -1,6 +1,7 @@
 #include "search_server.h"
 #include "parse.h"
 #include "test_runner.h"
+#include "profile.h"
 
 #include <algorithm>
 #include <iterator>
@@ -200,6 +201,65 @@ void TestBasicSearch() {
   TestFunctionality(docs, queries, expected);
 }
 
+void HeavyTest() {
+	string docs;
+	string queries;
+	{
+	LOG_DURATION("Generate");
+	vector<string> words(10000);
+
+	for(int i = 0; i < 10000; ++i ) {
+		string word;
+		int t = i;
+		for(int j = 0; j < 100; ++j) {
+			word += (t % 2 == 0 ? 'a': 'b');
+			t = t/2;
+		}
+		words.push_back(move(word));
+	}
+
+
+	for(int i = 0; i < 50000; ++i ) {
+		if(i > 0) {
+			docs += '\n';
+		}
+		for (int j = 0; j < 1000; ++j) {
+			if(j > 0) {
+				docs += ' ';
+			}
+			docs += words[rand() % 10000];
+		}
+	}
+
+	for(int i = 0; i < 500000; ++i ) {
+		if(i > 0) {
+			queries += '\n';
+		}
+		for (int j = 0; j < 10; ++j) {
+			if(j > 0) {
+				queries += ' ';
+			}
+			queries += words[rand() % 10000];
+		}
+	}
+
+	}
+
+  istringstream docs_input(docs);
+  istringstream queries_input(queries);
+
+  SearchServer srv;
+  {
+  LOG_DURATION("Update");
+  srv.UpdateDocumentBase(docs_input);
+  }
+  {
+  LOG_DURATION("Query");
+  ostringstream queries_output;
+  srv.AddQueriesStream(queries_input, queries_output);
+  }
+}
+
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestSerpFormat);
@@ -207,4 +267,5 @@ int main() {
   RUN_TEST(tr, TestHitcount);
   RUN_TEST(tr, TestRanking);
   RUN_TEST(tr, TestBasicSearch);
+  RUN_TEST(tr, HeavyTest);
 }
