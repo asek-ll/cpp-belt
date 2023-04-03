@@ -11,7 +11,7 @@ using namespace std;
 
 class InvertedIndex {
 public:
-  void Add(const string& document);
+  void Add(string document);
   list<size_t> Lookup(const string& word) const;
 
   const string& GetDocument(size_t id) const {
